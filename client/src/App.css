@@ -1,0 +1,39 @@
+/* Reset & Layout */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+
+.app-container { height: 100vh; display: flex; justify-content: center; align-items: center; }
+
+/* Login Screen */
+.login-screen { text-align: center; }
+.login-box { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 200px; margin-right: 10px; }
+button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+button:hover { background: #0056b3; }
+
+/* Chat Container */
+.chat-container { display: flex; width: 900px; height: 80vh; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+/* Sidebar */
+.sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; }
+.sidebar .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.status-dot.online { background: #2ecc71; }
+.sidebar ul { list-style: none; padding: 0; }
+.sidebar li { padding: 10px; border-bottom: 1px solid #34495e; }
+.sidebar li.me { font-weight: bold; color: #3498db; }
+
+/* Chat Area */
+.chat-area { flex: 1; display: flex; flex-direction: column; background: #f9f9f9; }
+.messages-list { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+/* Messages */
+.message { max-width: 70%; padding: 10px 15px; border-radius: 10px; font-size: 14px; position: relative; }
+.message small { display: block; font-size: 10px; margin-bottom: 2px; opacity: 0.7; }
+.message.sent { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 2px; }
+.message.received { align-self: flex-start; background: #e9ecef; color: #333; border-bottom-left-radius: 2px; }
+.message.system { align-self: center; background: transparent; color: #888; font-style: italic; font-size: 12px; }
+
+/* Input Area */
+.input-area { padding: 20px; background: white; border-top: 1px solid #ddd; display: flex; gap: 10px; }
+.input-area input { flex: 1; width: auto; }
