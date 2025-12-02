@@ -2,17 +2,27 @@ import { useState, useEffect, useRef } from 'react';
 import { useSocket } from './socket';
 
 function App() {
-  const { isConnected, messages, connect, sendMessage, users } = useSocket();
+  const { 
+    isConnected, 
+    messages, 
+    connect, 
+    sendMessage, 
+    users,
+    typingUsers, 
+    setTyping    
+  } = useSocket();
 
   const [username, setUsername] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
   
   const messagesEndRef = useRef(null);
+  
+  // Auto-scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  useEffect(scrollToBottom, [messages]);
+  useEffect(scrollToBottom, [messages, typingUsers]);
 
   const handleLogin = () => {
     if (username.trim()) {
@@ -25,15 +35,34 @@ function App() {
     if (currentMessage.trim()) {
       sendMessage(currentMessage);
       setCurrentMessage("");
+      setTyping(false); 
     }
   };
 
+  const handleInputChange = (e) => {
+    setCurrentMessage(e.target.value);
+    
+    if (e.target.value.length > 0) {
+      setTyping(true);
+    } else {
+      setTyping(false);
+    }
+
+    // Stop typing status after 3 seconds of inactivity
+    setTimeout(() => {
+       setTyping(false); 
+    }, 3000);
+  };
+
+  const formatTime = (isoString) => {
+    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
-    // Main Container
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-sans">
       
       {!isLoggedIn ? (
-        // LOGIN SCREEN
+        // --- LOGIN SCREEN ---
         <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">🚀 Join Chat</h1>
           <div className="flex flex-col gap-4">
@@ -54,10 +83,10 @@ function App() {
           </div>
         </div>
       ) : (
-        // CHAT SCREEN
+        // --- MAIN CHAT SCREEN ---
         <div className="flex flex-col md:flex-row w-full max-w-6xl h-[85vh] bg-white rounded-xl shadow-2xl overflow-hidden">
           
-          {/* Sidebar */}
+          {/* SIDEBAR */}
           <div className="w-full md:w-1/4 bg-slate-900 text-white flex flex-col border-r border-slate-700">
             <div className="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-950">
               <h3 className="font-bold text-lg">Active Users</h3>
@@ -79,7 +108,7 @@ function App() {
             </ul>
           </div>
 
-          {/* Main Chat Area */}
+          {/* CHAT AREA */}
           <div className="flex-1 flex flex-col bg-slate-50 relative">
             
             {/* Messages List */}
@@ -92,13 +121,32 @@ function App() {
                   {msg.system ? (
                     <span className="text-xs text-gray-400 bg-gray-200 px-3 py-1 rounded-full">{msg.message}</span>
                   ) : (
-                    <div className={`max-w-[75%] px-5 py-3 rounded-2xl shadow-sm text-sm ${msg.sender === username ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'}`}>
+                    <div className={`max-w-[75%] px-5 py-3 rounded-2xl shadow-sm text-sm relative ${msg.sender === username ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'}`}>
                       {msg.sender !== username && <p className="text-[10px] font-bold text-gray-500 mb-1">{msg.sender}</p>}
-                      <p className="leading-relaxed">{msg.message}</p>
+                      
+                      <p className="leading-relaxed mb-1">{msg.message}</p>
+                      
+                      {/* Timestamp (Always Visible) */}
+                      <p className={`text-[10px] text-right ${msg.sender === username ? 'text-blue-200' : 'text-gray-400'}`}>
+                        {formatTime(msg.timestamp)}
+                      </p>
                     </div>
                   )}
                 </div>
               ))}
+              
+              {/* Typing Bubble */}
+              {typingUsers.length > 0 && (
+                <div className="flex items-center gap-2 text-xs text-gray-400 ml-4 animate-pulse">
+                   <div className="flex gap-1">
+                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></span>
+                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
+                   </div>
+                   {typingUsers.join(", ")} is typing...
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
 
@@ -109,7 +157,7 @@ function App() {
                   type="text"
                   className="flex-1 px-4 py-3 bg-gray-100 border-transparent focus:bg-white border focus:border-blue-500 rounded-full outline-none transition-all"
                   value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Type a message..."
                 />
